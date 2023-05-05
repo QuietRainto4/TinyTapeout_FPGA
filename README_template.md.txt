@@ -4,8 +4,7 @@
 18-224/624 Spring 2023 Final Tapeout Project
 
 ## Overview
-
-(high-level overview of what your project does, in a few lines)
+A 4 by 4 basic FPGA. Can simulate up to 12 gates.
 
 ## How it Works
 
@@ -22,10 +21,10 @@ To add images, upload them into the repo and use the following format to embed t
 (if you have any specific dependency on clock frequency; i.e. for visual effects or for an external interface, explain it here.)
 
 ## Hardware Peripherals
-
-(if you have any external hardware peripherals such as buttons, LEDs, sensors, etc, please explain them here. otherwise, remove this section)
+None
 
 ## Design Testing / Bringup
+Write system verilog testbench 
 
 (explain how to test your design; if relevant, give examples of inputs and expected outputs)
 
