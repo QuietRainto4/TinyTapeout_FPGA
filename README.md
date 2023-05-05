@@ -1,18 +1,17 @@
-# (project name)
+# TinyTapeout_FPGA
 
-(your name)
+Yu-Ching Wu
 18-224/624 Spring 2023 Final Tapeout Project
 
 ## Overview
+
 A 4 by 4 basic FPGA. Can simulate up to 12 gates.
 
 ## How it Works
 
-(deeper description of your project's internal operations, along with any diagrams. large parts of this can likely be copied from your project design plan and/or RTL checkpoint submission)
+Each CLB block contains two switch box, one connecting to sel 0 in the LUT and the other connecting to sel 1 in the LUT. There is also the option of using the CLB block as register. It is possible for the CLB to be connected to any other CLB in the column before, current column, and the column after.
 
-To add images, upload them into the repo and use the following format to embed them in markdown:
-
-![](image1.png)
+![](datapath.png)
 
 ## Inputs/Outputs
 
