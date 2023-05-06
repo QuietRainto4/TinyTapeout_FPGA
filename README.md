@@ -41,8 +41,9 @@ Write system verilog testbench. Two testcases, one to be able to pass values thr
 
 ![](Images/passThrough.jpg)
 
-Setting up and output of counter
-![](Images/'Output Testcase'.png)
+Setting up and output of counter.
+
+![](Images/OutputTestcase.png)
 
 ## Media
 
