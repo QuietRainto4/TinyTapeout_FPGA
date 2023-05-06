@@ -37,9 +37,12 @@ None
 ## Design Testing / Bringup
 Write system verilog testbench. Two testcases, one to be able to pass values through all the modules, and the other to simulate a simply 2 bit counter.
 
-![](2bitCounter.png)
+![](Imgaes/2bitCounter.jpg)
 
-![](passThrough.png)
+![](Images/passThrough.jpg)
+
+Setting up and output of counter
+![](Images/Output Testcase.png)
 
 ## Media
 
