@@ -14,24 +14,36 @@ Each CLB block contains two switch box, one connecting to sel 0 in the LUT and t
 ![](datapath.png)
 
 ## Inputs/Outputs
+| Input Number | Config | User Input|
+| ---      | ---       | --- |
+| 0 | SelReg | input [0] |
+| 1 | LUT[0] | input [1] |
+| 2 | LUT[1] | input [2] |
+| 3 | LUT[2] | input [3] |
+| 4 | LUT[3] | |
+| 5 | Addr[0] | |
+| 6 | Addr[1] | |
+| 7 | Addr[2] | |
+| 8 | Addr[3] | |
+| 9 | Addr[4] | |
+| 10 | Addr[5] | |
+| 11 | Addr[6] | |
 
-(describe what each of the 12 input and 12 output pins are used for; )
-
-(if you have any specific dependency on clock frequency; i.e. for visual effects or for an external interface, explain it here.)
+Output[3:0] will be connected to the last four clb of the FPGA.
 
 ## Hardware Peripherals
 None
 
 ## Design Testing / Bringup
-Write system verilog testbench 
+Write system verilog testbench. Two testcases, one to be able to pass values through all the modules, and the other to simulate a simply 2 bit counter.
 
-(explain how to test your design; if relevant, give examples of inputs and expected outputs)
+![](2bitCounter.png)
 
-(if you would like your design to be tested after integration but before tapeout, provide a Python script that uses the Debug Interface posted on canvas and explain here how to run the testing script)
+![](passThrough.png)
 
 ## Media
 
-(optionally include any photos or videos of your design in action)
+
 
 ## (anything else)
 
