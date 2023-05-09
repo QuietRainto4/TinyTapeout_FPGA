@@ -16,18 +16,18 @@ Each CLB block contains two switch box, one connecting to sel 0 in the LUT and t
 ## Inputs/Outputs
 | Input Number | Config | User Input|
 | ---      | ---       | --- |
-| 0 | SelReg | input [0] |
-| 1 | LUT[0] | input [1] |
-| 2 | LUT[1] | input [2] |
-| 3 | LUT[2] | input [3] |
-| 4 | LUT[3] | |
-| 5 | Addr[0] | |
-| 6 | Addr[1] | |
-| 7 | Addr[2] | |
-| 8 | Addr[3] | |
-| 9 | Addr[4] | |
-| 10 | Addr[5] | |
-| 11 | Addr[6] | |
+| 0 | 1'b0 | 1'b1 |
+| 1 | SelDFF | input[0] |
+| 2 | LUT[0] | input[1] |
+| 3 | LUT[1] | input[2] |
+| 4 | LUT[2] | input[3]|
+| 5 | LUW[3] | |
+| 6 | Addr[0] | |
+| 7 | Addr[1] | |
+| 8 | Addr[2] | |
+| 9 | Addr[3] | |
+| 10 | Addr[4] | |
+| 11 | Addr[5] | |
 
 Output[3:0] will be connected to the last four clb of the FPGA.
 
