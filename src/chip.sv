@@ -6,7 +6,7 @@ module Register
     input logic [W-1:0] D,
     output logic [W-1:0] Q
 );
-    always_ff @(posedge clock) begin
+    always_ff @(posedge clock, posedge reset) begin
         if (reset) begin
             Q <= 'd0;
         end else if (en) begin
@@ -25,7 +25,7 @@ module Counter
     input logic reset, clock, en,
     output logic [W-1:0] Q
 );
-    always_ff @(posedge clock) begin
+    always_ff @(posedge clock, posedge reset) begin
         if (reset) begin
             Q <= 'd0;
         end else if (en) begin
@@ -70,7 +70,8 @@ module SwitchBox(
     // store configuration of select
     Register #(4) data (.clock, .reset, .en(set), .D(selectConfig), .Q(selectLine));
     
-    assign out = inputs[selectLine];
+
+    assign out = inputs[11:8];
 endmodule: SwitchBox
 
 // configures mux to select inputs for the initial column of CLB
@@ -101,7 +102,8 @@ module my_chip (
     logic [4:0] setData;
 
     always_comb begin
-        if (io_in[11] == 1'b1) begin
+    
+        if (io_in[0] == 1'b1) begin
             userInput = 4'b0;
             address = io_in[11:6];
             setData = io_in[5:1];
@@ -124,25 +126,9 @@ module FPGA (
     output logic [3:0] out
 );
 
-    // slow CLB clock down for register
-    logic CLBClock, regClock;
-    logic [3:0] count;
-
-    always_ff @(posedge clock, posedge reset) begin
-        if (reset) begin
-            count <= 4'd0;
-            CLBClock <= 1'b0;
-        end else if (count == 4'd15) begin
-            count <= 4'd0;
-            CLBClock <= ~CLBClock;
-        end else begin
-            count <= count + 1'b1;
-        end
-    end
-
     // logic [5:0] address;
     logic [7:0] inputSel;
-    logic [15:0] CLBOut, tempCLBOut;
+    logic [15:0] CLBOut;
     logic [1:0] switchOut4, switchOut5, switchOut6;
     logic [1:0] switchOut7, switchOut8, switchOut9, switchOut10, switchOut11, switchOut12, switchOut13;
     logic [1:0] switchOut14, switchOut15;
@@ -150,63 +136,57 @@ module FPGA (
     assign out = CLBOut[15:12];
 
     // Counter #(6) addressCount(.reset, .clock, .en(enAddress), .Q(address));
-    // register to store the output of the CLB
-    Register #(16) clb(.reset,
-                       .clock,
-                       .en(1'b1),
-                       .D(tempCLBOut),
-                       .Q(CLBOut));
     
-    muxSel inputSel0(.clock(CLBClock), 
+    muxSel inputSel0(.clock, 
                      .reset,
                      .userInput,
                      .set(address == 6'd40),
                      .selConfig(setData[1:0]),
                      .out(inputSel[0]));
     
-    muxSel inputSel1(.clock(CLBClock), 
+    muxSel inputSel1(.clock, 
                      .reset,
                      .userInput,
                      .set(address == 6'd41),
                      .selConfig(setData[1:0]),
                      .out(inputSel[1]));
 
-    muxSel inputSel2(.clock(CLBClock), 
+    muxSel inputSel2(.clock, 
                      .reset,
                      .userInput,
                      .set(address == 6'd42),
                      .selConfig(setData[1:0]),
                      .out(inputSel[2]));
 
-    muxSel inputSel3(.clock(CLBClock), 
+    muxSel inputSel3(.clock, 
                      .reset,
                      .userInput,
                      .set(address == 6'd43),
                      .selConfig(setData[1:0]),
                      .out(inputSel[3]));
 
-    muxSel inputSel4(.clock(CLBClock), 
+    muxSel inputSel4(.clock, 
                      .reset,
                      .userInput,
                      .set(address == 6'd44),
                      .selConfig(setData[1:0]),
                      .out(inputSel[4]));
 
-    muxSel inputSel5(.clock(CLBClock), 
+    muxSel inputSel5(.clock, 
                      .reset,
                      .userInput,
                      .set(address == 6'd45),
                      .selConfig(setData[1:0]),
                      .out(inputSel[5]));
 
-    muxSel inputSel6(.clock(CLBClock), 
+    muxSel inputSel6(.clock, 
                      .reset,
                      .userInput,
                      .set(address == 6'd46),
                      .selConfig(setData[1:0]),
                      .out(inputSel[6]));
 
-    muxSel inputSel7(.clock(CLBClock), 
+    muxSel inputSel7(.clock, 
                      .reset,
                      .userInput,
                      .set(address == 6'd47),
@@ -214,302 +194,302 @@ module FPGA (
                      .out(inputSel[7]));
 
     // first column of CLB
-    CLB addr0 (.clock(CLBClock), 
+    CLB addr0 (.clock, 
                .reset, 
                .sel(inputSel[1:0]), // from inputMuxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd0),
-               .out(tempCLBOut[0]));
+               .out(CLBOut[0]));
 
-    CLB addr1 (.clock(CLBClock), 
+    CLB addr1 (.clock, 
                .reset, 
                .sel(inputSel[3:2]), // from inputMuxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd1),
-               .out(tempCLBOut[1]));
+               .out(CLBOut[1]));
 
-    CLB addr2 (.clock(CLBClock), 
+    CLB addr2 (.clock, 
                .reset, 
                .sel(inputSel[5:4]), // from inputMuxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd2),
-               .out(tempCLBOut[2]));
+               .out(CLBOut[2]));
     
-    CLB addr3 (.clock(CLBClock), 
+    CLB addr3 (.clock, 
                .reset, 
                .sel(inputSel[7:6]), // from inputMuxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd3),
-               .out(tempCLBOut[3]));
+               .out(CLBOut[3]));
 
     // second column of CLB
-    CLB addr4 (.clock(CLBClock), 
+    CLB addr4 (.clock, 
                .reset, 
                .sel(switchOut4), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd4),
-               .out(tempCLBOut[4]));
+               .out(CLBOut[4]));
 
-    CLB addr5 (.clock(CLBClock), 
+    CLB addr5 (.clock, 
                .reset, 
                .sel(switchOut5), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd5),
-               .out(tempCLBOut[5]));
+               .out(CLBOut[5]));
     
-    CLB addr6 (.clock(CLBClock), 
+    CLB addr6 (.clock, 
                .reset, 
                .sel(switchOut6), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd6),
-               .out(tempCLBOut[6]));
+               .out(CLBOut[6]));
 
-    CLB addr7 (.clock(CLBClock), 
+    CLB addr7 (.clock, 
                .reset, 
                .sel(switchOut7), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd7),
-               .out(tempCLBOut[7]));
+               .out(CLBOut[7]));
     
     // third column of CLB
-    CLB addr8 (.clock(CLBClock), 
+    CLB addr8 (.clock, 
                .reset, 
                .sel(switchOut8), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd8),
-               .out(tempCLBOut[8]));
+               .out(CLBOut[8]));
 
-    CLB addr9 (.clock(CLBClock), 
+    CLB addr9 (.clock, 
                .reset, 
                .sel(switchOut9), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd9),
-               .out(tempCLBOut[9]));
+               .out(CLBOut[9]));
     
-    CLB addr10 (.clock(CLBClock), 
+    CLB addr10 (.clock, 
                .reset, 
                .sel(switchOut10), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd10),
-               .out(tempCLBOut[10]));
+               .out(CLBOut[10]));
 
-    CLB addr11 (.clock(CLBClock), 
+    CLB addr11 (.clock, 
                .reset, 
                .sel(switchOut11), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd11),
-               .out(tempCLBOut[11]));
+               .out(CLBOut[11]));
 
     // fourth column of CLB
-    CLB addr12 (.clock(CLBClock), 
+    CLB addr12 (.clock, 
                .reset, 
                .sel(switchOut12), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd12),
-               .out(tempCLBOut[12]));
+               .out(CLBOut[12]));
 
-    CLB addr13 (.clock(CLBClock), 
+    CLB addr13 (.clock, 
                .reset, 
                .sel(switchOut13), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd13),
-               .out(tempCLBOut[13]));
+               .out(CLBOut[13]));
 
-    CLB addr14 (.clock(CLBClock), 
+    CLB addr14 (.clock, 
                .reset, 
                .sel(switchOut14), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd14),
-               .out(tempCLBOut[14]));
+               .out(CLBOut[14]));
 
-    CLB addr15 (.clock(CLBClock), 
+    CLB addr15 (.clock, 
                .reset, 
                .sel(switchOut15), // from switchboxes
                .LUTConfig(setData[3:0]), 
                .memSel_in(setData[4]), 
                .set(address == 6'd15),
-               .out(tempCLBOut[15]));
+               .out(CLBOut[15]));
 
 
     // each layer have 8 switchboxes, 4 CLB
     // 3 layer of switchboxes, 4 layers of CLB
-    SwitchBox switch16 (.clock(CLBClock), 
+    SwitchBox switch16 (.clock, 
                        .reset, 
                        .set(address == 6'd16),
                        .inputs(CLBOut[11:0]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut4[0]));
     
-    SwitchBox switch17 (.clock(CLBClock), 
+    SwitchBox switch17 (.clock, 
                        .reset, 
                        .set(address == 6'd17),
                        .inputs(CLBOut[11:0]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut4[1]));
     
-    SwitchBox switch18 (.clock(CLBClock), 
+    SwitchBox switch18 (.clock, 
                        .reset, 
                        .set(address == 6'd18),
                        .inputs(CLBOut[11:0]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut5[0]));
 
-    SwitchBox switch19 (.clock(CLBClock), 
+    SwitchBox switch19 (.clock, 
                        .reset, 
                        .set(address == 6'd19),
                        .inputs(CLBOut[11:0]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut5[1]));
 
-    SwitchBox switch20 (.clock(CLBClock), 
+    SwitchBox switch20 (.clock, 
                        .reset, 
                        .set(address == 6'd20),
                        .inputs(CLBOut[11:0]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut6[0]));
 
-    SwitchBox switch21 (.clock(CLBClock), 
+    SwitchBox switch21 (.clock, 
                        .reset, 
                        .set(address == 6'd21),
                        .inputs(CLBOut[11:0]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut6[1]));
 
-    SwitchBox switch22 (.clock(CLBClock), 
+    SwitchBox switch22 (.clock, 
                        .reset, 
                        .set(address == 6'd22),
                        .inputs(CLBOut[11:0]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut7[0]));
 
-    SwitchBox switch23 (.clock(CLBClock), 
+    SwitchBox switch23 (.clock, 
                        .reset, 
                        .set(address == 6'd23),
                        .inputs(CLBOut[11:0]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut7[1]));
 
-    SwitchBox switch24 (.clock(CLBClock), 
+    SwitchBox switch24 (.clock, 
                        .reset, 
                        .set(address == 6'd24),
                        .inputs(CLBOut[15:4]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut8[0]));
-    
-    SwitchBox switch25 (.clock(CLBClock), 
+
+    SwitchBox switch25 (.clock, 
                        .reset, 
                        .set(address == 6'd25),
                        .inputs(CLBOut[15:4]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut8[1]));
-    
-    SwitchBox switch26 (.clock(CLBClock), 
+
+    SwitchBox switch26 (.clock, 
                        .reset, 
                        .set(address == 6'd26),
                        .inputs(CLBOut[15:4]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut9[0]));
 
-    SwitchBox switch27 (.clock(CLBClock), 
+    SwitchBox switch27 (.clock, 
                        .reset, 
                        .set(address == 6'd27),
                        .inputs(CLBOut[15:4]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut9[1]));
 
-    SwitchBox switch28 (.clock(CLBClock), 
+    SwitchBox switch28 (.clock, 
                        .reset, 
                        .set(address == 6'd28),
                        .inputs(CLBOut[15:4]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut10[0]));
 
-    SwitchBox switch29 (.clock(CLBClock), 
+    SwitchBox switch29 (.clock, 
                        .reset, 
                        .set(address == 6'd29),
                        .inputs(CLBOut[15:4]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut10[1]));
 
-    SwitchBox switch30 (.clock(CLBClock), 
+    SwitchBox switch30 (.clock, 
                        .reset, 
                        .set(address == 6'd30),
                        .inputs(CLBOut[15:4]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut11[0]));
 
-    SwitchBox switch31 (.clock(CLBClock), 
+    SwitchBox switch31 (.clock, 
                        .reset, 
                        .set(address == 6'd31),
                        .inputs(CLBOut[15:4]),
                        .selectConfig(setData[3:0]),
                        .out(switchOut11[1]));
 
-    SwitchBox switch32 (.clock(CLBClock), 
+    SwitchBox switch32 (.clock, 
                        .reset, 
                        .set(address == 6'd32),
                        .inputs({4'b0, CLBOut[15:8]}),
                        .selectConfig(setData[3:0]),
                        .out(switchOut12[0]));
     
-    SwitchBox switch33 (.clock(CLBClock), 
+    SwitchBox switch33 (.clock, 
                        .reset, 
                        .set(address == 6'd33),
                        .inputs({4'b0, CLBOut[15:8]}),
                        .selectConfig(setData[3:0]),
                        .out(switchOut12[1]));
     
-    SwitchBox switch34 (.clock(CLBClock), 
+    SwitchBox switch34 (.clock, 
                        .reset, 
                        .set(address == 6'd34),
                        .inputs({4'b0, CLBOut[15:8]}),
                        .selectConfig(setData[3:0]),
                        .out(switchOut13[0]));
 
-    SwitchBox switch35 (.clock(CLBClock), 
+    SwitchBox switch35 (.clock, 
                        .reset, 
                        .set(address == 6'd35),
                        .inputs({4'b0, CLBOut[15:8]}),
                        .selectConfig(setData[3:0]),
                        .out(switchOut13[1]));
 
-    SwitchBox switch36 (.clock(CLBClock), 
+    SwitchBox switch36 (.clock, 
                        .reset, 
                        .set(address == 6'd36),
                        .inputs({4'b0, CLBOut[15:8]}),
                        .selectConfig(setData[3:0]),
                        .out(switchOut14[0]));
 
-    SwitchBox switch37 (.clock(CLBClock), 
+    SwitchBox switch37 (.clock, 
                        .reset, 
                        .set(address == 6'd37),
                        .inputs({4'b0, CLBOut[15:8]}),
                        .selectConfig(setData[3:0]),
                        .out(switchOut14[1]));
 
-    SwitchBox switch38 (.clock(CLBClock), 
+    SwitchBox switch38 (.clock, 
                        .reset, 
                        .set(address == 6'd38),
                        .inputs({4'b0, CLBOut[15:8]}),
                        .selectConfig(setData[3:0]),
                        .out(switchOut15[0]));
 
-    SwitchBox switch39 (.clock(CLBClock), 
+    SwitchBox switch39 (.clock, 
                        .reset, 
                        .set(address == 6'd39),
                        .inputs({4'b0, CLBOut[15:8]}),
